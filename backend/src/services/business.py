@@ -7,7 +7,14 @@ import numpy as np
 def metadata():
     return {"name": "传感器校准偏差复核", "short": "sensor-bootstrap", "tagline": "保留温区构成，估计校准残差的可信范围。", "client": "望衡仪器 · 16 人校准实验室，复核工业温度探头的批次偏差", "workflow": "实验员汇总低、常、高温记录，只按整体平均误差判定是否重校。", "pains": ["不同温区的样本构成被打散", "偏差估计缺少区间", "补偿值变化后要重复手算"], "upstream": "探头与标准源配对记录 WH_calibration_pairs.csv", "downstream": "计量工程师据残差分层区间安排复校",
             "entities": ["校准配对样本", "分层偏差复核", "计量复核简报"], "dataset_name": "T-24 探头批次 · 三温区 240 对读数",
-            "columns": [{"key": "sample", "label": "读数编号", "type": "string"}, {"key": "band", "label": "温区", "type": "string"}, {"key": "reference", "label": "标准值 °C", "type": "number"}, {"key": "measured", "label": "探头值 °C", "type": "number"}],
+            "columns": [{"key": "sample", "label": "读数编号", "type": "string"}, {"key": "band", "label": "温区", "type": "string"}, {"key": "reference", "label": "标准值（分析统一摄氏 °C）", "type": "number"}, {"key": "measured", "label": "探头值（分析统一摄氏 °C）", "type": "number"}],
+            "temperature_scales": [
+                {"code": "CELSIUS", "label": "摄氏 °C", "aliases": ["C", "°C", "摄氏"]},
+                {"code": "FAHRENHEIT", "label": "华氏 °F", "aliases": ["F", "°F", "华氏"]},
+                {"code": "KELVIN", "label": "开尔文 K", "aliases": ["K", "开尔文"]},
+            ],
+            "scale_rules": "旧接入不带温标字段，按摄氏写入；新接入逐条声明 reference_scale/measured_scale（或行级 scale）。未知温标或低于绝对零度的读数整体拒绝；存储保留原值与温标，分析只使用换算后的摄氏值。",
+            "absolute_zero": {"celsius": -273.15, "fahrenheit": -459.67, "kelvin": 0},
             "parameters": [{"key": "offset", "label": "扣除补偿值 °C", "type": "number", "default": 0, "min": -2, "max": 2}, {"key": "confidence", "label": "置信度", "type": "select", "default": "0.95", "options": [{"value": str(x), "label": f"{x*100:g}%"} for x in [.9, .95, .99]]}, {"key": "resamples", "label": "重采样次数", "type": "number", "default": 2000, "min": 500, "max": 5000}],
             "workbench_title": "分层校准区间估计", "action_label": "执行分层 Bootstrap", "unit": "°C", "accent": "oklch(50% 0.105 320)", "style": "metrology",
             "seed_story": ["08:00 实验员导入 WH_calibration_pairs.csv，240 对读数。", "08:15 核对低温、常温、高温各 80 对。", "08:30 设补偿值 0°C、95% 区间、2000 次采样。", "08:35 执行分层 bootstrap，查看总体及各温区区间。", "08:50 找出区间不跨 0 的温区。", "09:10 将补偿值设为 0.3°C，复核剩余偏差。", "09:40 导出计量简报，安排分温区补偿试验。"],

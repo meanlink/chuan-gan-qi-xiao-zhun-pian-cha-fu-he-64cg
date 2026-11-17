@@ -9,6 +9,8 @@ class Job(Base):
     params: Mapped[dict] = mapped_column(JSON, default=dict)
     status: Mapped[str] = mapped_column(String(20), default='queued')
     result: Mapped[dict] = mapped_column(JSON, default=dict)
+    # 冻结的完整输入（摄氏视图）与逐条换算依据；任务一旦排队即不可变，新旧存储不混用。
+    input_snapshot: Mapped[dict] = mapped_column(JSON, default=dict)
     error: Mapped[str] = mapped_column(String(1000), default='')
     approved: Mapped[bool] = mapped_column(Boolean, default=False)
     created_by: Mapped[int] = mapped_column(ForeignKey('users.id'))
